@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>My Webcrumbs Plugin</title>
+        <style>
+            @import url(https://fonts.googleapis.com/css2?family=Lato&display=swap);
+            @import url(https://fonts.googleapis.com/css2?family=Open+Sans&display=swap);
+
+            *,
+            :after,
+            :before {
+                --tw-border-spacing-x: 0;
+                --tw-border-spacing-y: 0;
+                --tw-translate-x: 0;
+                --tw-translate-y: 0;
+                --tw-rotate: 0;
+                --tw-skew-x: 0;
+                --tw-skew-y: 0;
+                --tw-scale-x: 1;
+                --tw-scale-y: 1;
+                --tw-pan-x: ;
+                --tw-pan-y: ;
+                --tw-pinch-zoom: ;
+                --tw-scroll-snap-strictness: proximity;
+                --tw-gradient-from-position: ;
+                --tw-gradient-via-position: ;
+                --tw-gradient-to-position: ;
+                --tw-ordinal: ;
+                --tw-slashed-zero: ;
+                --tw-numeric-figure: ;
+                --tw-numeric-spacing: ;
+                --tw-numeric-fraction: ;
+                --tw-ring-inset: ;
+                --tw-ring-offset-width: 0px;
+                --tw-ring-offset-color: #fff;
+                --tw-ring-color: rgba(59, 130, 246, 0.5);
+                --tw-ring-offset-shadow: 0 0 #0000;
+                --tw-ring-shadow: 0 0 #0000;
+                --tw-shadow: 0 0 #0000;
+                --tw-shadow-colored: 0 0 #0000;
+                --tw-blur: ;
+                --tw-brightness: ;
+                --tw-contrast: ;
+                --tw-grayscale: ;
+                --tw-hue-rotate: ;
+                --tw-invert: ;
+                --tw-saturate: ;
+                --tw-sepia: ;
+                --tw-drop-shadow: ;
+                --tw-backdrop-blur: ;
+                --tw-backdrop-brightness: ;
+                --tw-backdrop-contrast: ;
+                --tw-backdrop-grayscale: ;
+                --tw-backdrop-hue-rotate: ;
+                --tw-backdrop-invert: ;
+                --tw-backdrop-opacity: ;
+                --tw-backdrop-saturate: ;
+                --tw-backdrop-sepia: ;
+                --tw-contain-size: ;
+                --tw-contain-layout: ;
+                --tw-contain-paint: ;
+                --tw-contain-style: ;
+            }
+            ::backdrop {
+                --tw-border-spacing-x: 0;
+                --tw-border-spacing-y: 0;
+                --tw-translate-x: 0;
+                --tw-translate-y: 0;
+                --tw-rotate: 0;
+                --tw-skew-x: 0;
+                --tw-skew-y: 0;
+                --tw-scale-x: 1;
+                --tw-scale-y: 1;
+                --tw-pan-x: ;
+                --tw-pan-y: ;
+                --tw-pinch-zoom: ;
+                --tw-scroll-snap-strictness: proximity;
+                --tw-gradient-from-position: ;
+                --tw-gradient-via-position: ;
+                --tw-gradient-to-position: ;
+                --tw-ordinal: ;
+                --tw-slashed-zero: ;
+                --tw-numeric-figure: ;
+                --tw-numeric-spacing: ;
+                --tw-numeric-fraction: ;
+                --tw-ring-inset: ;
+                --tw-ring-offset-width: 0px;
+                --tw-ring-offset-color: #fff;
+                --tw-ring-color: rgba(59, 130, 246, 0.5);
+                --tw-ring-offset-shadow: 0 0 #0000;
+                --tw-ring-shadow: 0 0 #0000;
+                --tw-shadow: 0 0 #0000;
+                --tw-shadow-colored: 0 0 #0000;
+                --tw-blur: ;
+                --tw-brightness: ;
+                --tw-contrast: ;
+                --tw-grayscale: ;
+                --tw-hue-rotate: ;
+                --tw-invert: ;
+                --tw-saturate: ;
+                --tw-sepia: ;
+                --tw-drop-shadow: ;
+                --tw-backdrop-blur: ;
+                --tw-backdrop-brightness: ;
+                --tw-backdrop-contrast: ;
+                --tw-backdrop-grayscale: ;
+                --tw-backdrop-hue-rotate: ;
+                --tw-backdrop-invert: ;
+                --tw-backdrop-opacity: ;
+                --tw-backdrop-saturate: ;
+                --tw-backdrop-sepia: ;
+                --tw-contain-size: ;
+                --tw-contain-layout: ;
+                --tw-contain-paint: ;
+                --tw-contain-style: ;
+            } /*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/
+            *,
+            :after,
+            :before {
+                border: 0 solid #e5e7eb;
+                box-sizing: border-box;
+            }
+            :after,
+            :before {
+                --tw-content: "";
+            }
+            :host,
+            html {
+                line-height: 1.5;
+                -webkit-text-size-adjust: 100%;
+                font-family:
+                    Open Sans,
+                    ui-sans-serif,
+                    system-ui,
+                    sans-serif,
+                    Apple Color Emoji,
+                    Segoe UI Emoji,
+                    Segoe UI Symbol,
+                    Noto Color Emoji;
+                font-feature-settings: normal;
+                font-variation-settings: normal;
+                -moz-tab-size: 4;
+                tab-size: 4;
+                -webkit-tap-highlight-color: transparent;
+            }
+            body {
+                line-height: inherit;
+                margin: 0;
+            }
+            hr {
+                border-top-width: 1px;
+                color: inherit;
+                height: 0;
+            }
+            abbr:where([title]) {
+                text-decoration: underline dotted;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-size: inherit;
+                font-weight: inherit;
+            }
+            a {
+                color: inherit;
+                text-decoration: inherit;
+            }
+            b,
+            strong {
+                font-weight: bolder;
+            }
+            code,
+            kbd,
+            pre,
+            samp {
+                font-family:
+                    ui-monospace,
+                    SFMono-Regular,
+                    Menlo,
+                    Monaco,
+                    Consolas,
+                    Liberation Mono,
+                    Courier New,
+                    monospace;
+                font-feature-settings: normal;
+                font-size: 1em;
+                font-variation-settings: normal;
+            }
+            small {
+                font-size: 80%;
+            }
+            sub,
+            sup {
+                font-size: 75%;
+                line-height: 0;
+                position: relative;
+                vertical-align: baseline;
+            }
+            sub {
+                bottom: -0.25em;
+            }
+            sup {
+                top: -0.5em;
+            }
+            table {
+                border-collapse: collapse;
+                border-color: inherit;
+                text-indent: 0;
+            }
+            button,
+            input,
+            optgroup,
+            select,
+            textarea {
+                color: inherit;
+                font-family: inherit;
+                font-feature-settings: inherit;
+                font-size: 100%;
+                font-variation-settings: inherit;
+                font-weight: inherit;
+                letter-spacing: inherit;
+                line-height: inherit;
+                margin: 0;
+                padding: 0;
+            }
+            button,
+            select {
+                text-transform: none;
+            }
+            button,
+            input:where([type="button"]),
+            input:where([type="reset"]),
+            input:where([type="submit"]) {
+                -webkit-appearance: button;
+                background-color: transparent;
+                background-image: none;
+            }
+            :-moz-focusring {
+                outline: auto;
+            }
+            :-moz-ui-invalid {
+                box-shadow: none;
+            }
+            progress {
+                vertical-align: baseline;
+            }
+            ::-webkit-inner-spin-button,
+            ::-webkit-outer-spin-button {
+                height: auto;
+            }
+            [type="search"] {
+                -webkit-appearance: textfield;
+                outline-offset: -2px;
+            }
+            ::-webkit-search-decoration {
+                -webkit-appearance: none;
+            }
+            ::-webkit-file-upload-button {
+                -webkit-appearance: button;
+                font: inherit;
+            }
+            summary {
+                display: list-item;
+            }
+            blockquote,
+            dd,
+            dl,
+            figure,
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            hr,
+            p,
+            pre {
+                margin: 0;
+            }
+            fieldset {
+                margin: 0;
+            }
+            fieldset,
+            legend {
+                padding: 0;
+            }
+            menu,
+            ol,
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            dialog {
+                padding: 0;
+            }
+            textarea {
+                resize: vertical;
+            }
+            input::placeholder,
+            textarea::placeholder {
+                color: #9ca3af;
+                opacity: 1;
+            }
+            [role="button"],
+            button {
+                cursor: pointer;
+            }
+            :disabled {
+                cursor: default;
+            }
+            audio,
+            canvas,
+            embed,
+            iframe,
+            img,
+            object,
+            svg,
+            video {
+                display: block;
+                vertical-align: middle;
+            }
+            img,
+            video {
+                height: auto;
+                max-width: 100%;
+            }
+            [hidden]:where(:not([hidden="until-found"])) {
+                display: none;
+            }
+            .container {
+                width: 100%;
+            }
+            @media (min-width: 640px) {
+                .container {
+                    max-width: 640px;
+                }
+            }
+            @media (min-width: 768px) {
+                .container {
+                    max-width: 768px;
+                }
+            }
+            @media (min-width: 1024px) {
+                .container {
+                    max-width: 1024px;
+                }
+            }
+            @media (min-width: 1280px) {
+                .container {
+                    max-width: 1280px;
+                }
+            }
+            @media (min-width: 1536px) {
+                .container {
+                    max-width: 1536px;
+                }
+            }
+            #webcrumbs .absolute {
+                position: absolute;
+            }
+            #webcrumbs .relative {
+                position: relative;
+            }
+            #webcrumbs .bottom-0 {
+                bottom: 0;
+            }
+            #webcrumbs .left-0 {
+                left: 0;
+            }
+            #webcrumbs .right-0 {
+                right: 0;
+            }
+            #webcrumbs .top-0 {
+                top: 0;
+            }
+            #webcrumbs .top-6 {
+                top: 24px;
+            }
+            #webcrumbs .col-span-12 {
+                grid-column: span 12 / span 12;
+            }
+            #webcrumbs .col-span-2 {
+                grid-column: span 2 / span 2;
+            }
+            #webcrumbs .col-span-8 {
+                grid-column: span 8 / span 8;
+            }
+            #webcrumbs .mx-auto {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            #webcrumbs .ml-2 {
+                margin-left: 8px;
+            }
+            #webcrumbs .mr-3 {
+                margin-right: 12px;
+            }
+            #webcrumbs .mt-6 {
+                margin-top: 24px;
+            }
+            #webcrumbs .mt-8 {
+                margin-top: 32px;
+            }
+            #webcrumbs .flex {
+                display: flex;
+            }
+            #webcrumbs .inline-flex {
+                display: inline-flex;
+            }
+            #webcrumbs .grid {
+                display: grid;
+            }
+            #webcrumbs .h-14 {
+                height: 56px;
+            }
+            #webcrumbs .h-4 {
+                height: 16px;
+            }
+            #webcrumbs .h-6 {
+                height: 24px;
+            }
+            #webcrumbs .h-8 {
+                height: 32px;
+            }
+            #webcrumbs .min-h-screen {
+                min-height: 100vh;
+            }
+            #webcrumbs .w-14 {
+                width: 56px;
+            }
+            #webcrumbs .w-4 {
+                width: 16px;
+            }
+            #webcrumbs .w-6 {
+                width: 24px;
+            }
+            #webcrumbs .w-8 {
+                width: 32px;
+            }
+            #webcrumbs .w-full {
+                width: 100%;
+            }
+            #webcrumbs .max-w-4xl {
+                max-width: 56rem;
+            }
+            #webcrumbs .max-w-md {
+                max-width: 28rem;
+            }
+            #webcrumbs .-translate-x-1\/2 {
+                --tw-translate-x: -50%;
+            }
+            #webcrumbs .-translate-x-1\/2,
+            #webcrumbs .-translate-y-1\/2 {
+                transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
+                    skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+            #webcrumbs .-translate-y-1\/2 {
+                --tw-translate-y: -50%;
+            }
+            #webcrumbs .translate-x-1\/2 {
+                --tw-translate-x: 50%;
+            }
+            #webcrumbs .rotate-45,
+            #webcrumbs .translate-x-1\/2 {
+                transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
+                    skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+            #webcrumbs .rotate-45 {
+                --tw-rotate: 45deg;
+            }
+            #webcrumbs .transform {
+                transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
+                    skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+            #webcrumbs .cursor-pointer {
+                cursor: pointer;
+            }
+            #webcrumbs .grid-cols-12 {
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+            }
+            #webcrumbs .flex-row {
+                flex-direction: row;
+            }
+            #webcrumbs .items-center {
+                align-items: center;
+            }
+            #webcrumbs .justify-start {
+                justify-content: flex-start;
+            }
+            #webcrumbs .justify-end {
+                justify-content: flex-end;
+            }
+            #webcrumbs .justify-between {
+                justify-content: space-between;
+            }
+            #webcrumbs .gap-4 {
+                gap: 16px;
+            }
+            #webcrumbs .rounded-2xl {
+                border-radius: 48px;
+            }
+            #webcrumbs .rounded-full {
+                border-radius: 9999px;
+            }
+            #webcrumbs .border-l {
+                border-left-width: 1px;
+            }
+            #webcrumbs .border-r {
+                border-right-width: 1px;
+            }
+            #webcrumbs .border-t {
+                border-top-width: 1px;
+            }
+            #webcrumbs .border-none {
+                border-style: none;
+            }
+            #webcrumbs .border-white\/20 {
+                border-color: hsla(0, 0%, 100%, 0.2);
+            }
+            #webcrumbs .border-white\/50 {
+                border-color: hsla(0, 0%, 100%, 0.5);
+            }
+            #webcrumbs .bg-emerald-500 {
+                --tw-bg-opacity: 1;
+                background-color: rgb(16 185 129 / var(--tw-bg-opacity, 1));
+            }
+            #webcrumbs .bg-emerald-600\/80 {
+                background-color: rgba(5, 150, 105, 0.8);
+            }
+            #webcrumbs .bg-transparent {
+                background-color: transparent;
+            }
+            #webcrumbs .bg-white\/90 {
+                background-color: hsla(0, 0%, 100%, 0.9);
+            }
+            #webcrumbs .bg-gradient-to-b {
+                background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
+            }
+            #webcrumbs .from-emerald-600 {
+                --tw-gradient-from: #059669 var(--tw-gradient-from-position);
+                --tw-gradient-to: rgba(5, 150, 105, 0) var(--tw-gradient-to-position);
+                --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+            }
+            #webcrumbs .to-emerald-500 {
+                --tw-gradient-to: #10b981 var(--tw-gradient-to-position);
+            }
+            #webcrumbs .p-3 {
+                padding: 12px;
+            }
+            #webcrumbs .p-4 {
+                padding: 16px;
+            }
+            #webcrumbs .p-6 {
+                padding: 24px;
+            }
+            #webcrumbs .px-4 {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            #webcrumbs .px-8 {
+                padding-left: 32px;
+                padding-right: 32px;
+            }
+            #webcrumbs .py-2 {
+                padding-bottom: 8px;
+                padding-top: 8px;
+            }
+            #webcrumbs .py-3 {
+                padding-bottom: 12px;
+                padding-top: 12px;
+            }
+            #webcrumbs .font-sans {
+                font-family:
+                    Open Sans,
+                    ui-sans-serif,
+                    system-ui,
+                    sans-serif,
+                    Apple Color Emoji,
+                    Segoe UI Emoji,
+                    Segoe UI Symbol,
+                    Noto Color Emoji;
+            }
+            #webcrumbs .font-medium {
+                font-weight: 500;
+            }
+            #webcrumbs .leading-relaxed {
+                line-height: 1.625;
+            }
+            #webcrumbs .text-emerald-500 {
+                --tw-text-opacity: 1;
+                color: rgb(16 185 129 / var(--tw-text-opacity, 1));
+            }
+            #webcrumbs .text-emerald-700 {
+                --tw-text-opacity: 1;
+                color: rgb(4 120 87 / var(--tw-text-opacity, 1));
+            }
+            #webcrumbs .text-gray-700 {
+                --tw-text-opacity: 1;
+                color: rgb(55 65 81 / var(--tw-text-opacity, 1));
+            }
+            #webcrumbs .text-white {
+                --tw-text-opacity: 1;
+                color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+            }
+            #webcrumbs .placeholder-gray-400::placeholder {
+                --tw-placeholder-opacity: 1;
+                color: rgb(156 163 175 / var(--tw-placeholder-opacity, 1));
+            }
+            #webcrumbs .shadow-lg {
+                --tw-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+                --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+            }
+            #webcrumbs .shadow-lg,
+            #webcrumbs .shadow-md {
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+            }
+            #webcrumbs .shadow-md {
+                --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+                --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+            }
+            #webcrumbs .shadow-xl {
+                --tw-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+            }
+            #webcrumbs .outline-none {
+                outline: 2px solid transparent;
+                outline-offset: 2px;
+            }
+            #webcrumbs .drop-shadow-lg {
+                --tw-drop-shadow: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
+            }
+            #webcrumbs .drop-shadow-lg,
+            #webcrumbs .drop-shadow-md {
+                filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate)
+                    var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+            }
+            #webcrumbs .drop-shadow-md {
+                --tw-drop-shadow: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.07)) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+            }
+            #webcrumbs .backdrop-blur-md {
+                --tw-backdrop-blur: blur(12px);
+            }
+            #webcrumbs .backdrop-blur-md,
+            #webcrumbs .backdrop-blur-sm {
+                -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness)
+                    var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate)
+                    var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate)
+                    var(--tw-backdrop-sepia);
+                backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast)
+                    var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert)
+                    var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+            }
+            #webcrumbs .backdrop-blur-sm {
+                --tw-backdrop-blur: blur(4px);
+            }
+            #webcrumbs .transition-all {
+                transition-duration: 0.15s;
+                transition-property: all;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #webcrumbs .transition-colors {
+                transition-duration: 0.15s;
+                transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #webcrumbs .duration-300 {
+                transition-duration: 0.3s;
+            }
+            #webcrumbs {
+                font-family: Open Sans !important;
+                font-size: 16px !important;
+            }
+            #webcrumbs .hover\:scale-105:hover {
+                --tw-scale-x: 1.05;
+                --tw-scale-y: 1.05;
+                transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate))
+                    skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+            #webcrumbs .hover\:bg-emerald-600:hover {
+                --tw-bg-opacity: 1;
+                background-color: rgb(5 150 105 / var(--tw-bg-opacity, 1));
+            }
+            #webcrumbs .hover\:bg-white:hover {
+                --tw-bg-opacity: 1;
+                background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
+            }
+            #webcrumbs .hover\:text-emerald-500:hover {
+                --tw-text-opacity: 1;
+                color: rgb(16 185 129 / var(--tw-text-opacity, 1));
+            }
+            #webcrumbs .hover\:shadow-lg:hover {
+                --tw-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+                --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+            }
+            #webcrumbs .hover\:shadow-lg:hover,
+            #webcrumbs .hover\:shadow-xl:hover {
+                box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+            }
+            #webcrumbs .hover\:shadow-xl:hover {
+                --tw-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
+            }
+            @media (min-width: 768px) {
+                #webcrumbs .md\:col-span-1 {
+                    grid-column: span 1 / span 1;
+                }
+                #webcrumbs .md\:col-span-10 {
+                    grid-column: span 10 / span 10;
+                }
+            }
+        </style>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="https://cdn.webcrumbs.org/assets/images/landing/favicon.ico" />
+        <link
+            rel="apple-touch-icon"
+            sizes="192x192"
+            href="https://cdn.webcrumbs.org/assets/images/landing/logo192.png"
+        />
+        <link
+            rel="apple-touch-icon"
+            sizes="512x512"
+            href="https://cdn.webcrumbs.org/assets/images/landing/logo512.png"
+        />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Webcrumbs" />
+    </head>
+    <body>
+        <div id="webcrumbs">
+            <div class="relative bg-gradient-to-b from-emerald-600 to-emerald-500 min-h-screen font-sans">
+                <div class="container mx-auto grid grid-cols-12 gap-4 p-6">
+                    <div class="col-span-2 md:col-span-1">
+                        <div
+                            class="bg-white/90 rounded-full p-3 inline-flex shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white cursor-pointer transform hover:scale-105"
+                        >
+                            <svg
+                                class="w-8 h-8 text-emerald-500"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M12 17C12.5304 17 13.0391 16.7893 13.4142 16.4142C13.7893 16.0391 14 15.5304 14 15C14 14.4696 13.7893 13.9609 13.4142 13.5858C13.0391 13.2107 12.5304 13 12 13C11.4696 13 10.9609 13.2107 10.5858 13.5858C10.2107 13.9609 10 14.4696 10 15C10 15.5304 10.2107 16.0391 10.5858 16.4142C10.9609 16.7893 11.4696 17 12 17Z"
+                                    fill="currentColor"
+                                ></path>
+                                <path
+                                    d="M17 8H16V6C16 4.93913 15.5786 3.92172 14.8284 3.17157C14.0783 2.42143 13.0609 2 12 2C10.9391 2 9.92172 2.42143 9.17157 3.17157C8.42143 3.92172 8 4.93913 8 6V8H7C6.20435 8 5.44129 8.31607 4.87868 8.87868C4.31607 9.44129 4 10.2044 4 11V19C4 19.7956 4.31607 20.5587 4.87868 21.1213C5.44129 21.6839 6.20435 22 7 22H17C17.7956 22 18.5587 21.6839 19.1213 21.1213C19.6839 20.5587 20 19.7956 20 19V11C20 10.2044 19.6839 9.44129 19.1213 8.87868C18.5587 8.31607 17.7956 8 17 8ZM10 6C10 5.46957 10.2107 4.96086 10.5858 4.58579C10.9609 4.21071 11.4696 4 12 4C12.5304 4 13.0391 4.21071 13.4142 4.58579C13.7893 4.96086 14 5.46957 14 6V8H10V6Z"
+                                    fill="currentColor"
+                                ></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="col-span-8 md:col-span-10">
+                        <div class="bg-white/90 backdrop-blur-sm rounded-full flex justify-between px-8 py-3 shadow-lg">
+                            <a
+                                href="#"
+                                class="font-medium text-emerald-700 hover:text-emerald-500 transition-colors duration-300 relative after:content-[&#x27;&#x27;] after:absolute after:left-0 after:bottom-[-6px] after:h-[3px] after:w-full after:bg-emerald-500 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                                >Home</a
+                            >
+                            <a
+                                href="#"
+                                class="font-medium text-emerald-700 hover:text-emerald-500 transition-colors duration-300 relative after:content-[&#x27;&#x27;] after:absolute after:left-0 after:bottom-[-6px] after:h-[3px] after:w-full after:bg-emerald-500 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                                >ChatBot</a
+                            >
+                            <a
+                                href="#"
+                                class="font-medium text-emerald-700 hover:text-emerald-500 transition-colors duration-300 relative after:content-[&#x27;&#x27;] after:absolute after:left-0 after:bottom-[-6px] after:h-[3px] after:w-full after:bg-emerald-500 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                                >Artigos</a
+                            >
+                        </div>
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <div
+                            class="bg-white/90 rounded-full p-3 inline-flex shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white cursor-pointer transform hover:scale-105"
+                        >
+                            <svg
+                                class="w-6 h-6 text-emerald-500"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"
+                                    fill="currentColor"
+                                ></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="container mx-auto grid grid-cols-12 gap-4 p-6 mt-8">
+                    <div class="col-span-12 flex justify-end">
+                        <div
+                            class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 max-w-md relative shadow-lg border-l border-t border-white/50"
+                        >
+                            <p class="text-gray-700 font-medium">Quais exercícios treinam as costas?</p>
+                            <div
+                                class="absolute right-0 top-0 w-4 h-4 bg-white/90 transform rotate-45 translate-x-1/2 -translate-y-1/2 border-l border-t border-white/50"
+                            ></div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 flex justify-start mt-6">
+                        <div class="flex">
+                            <div class="mr-3">
+                                <svg
+                                    class="w-14 h-14 drop-shadow-lg"
+                                    viewBox="0 0 40 40"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <circle cx="20" cy="20" r="20" fill="#10B981" class="drop-shadow-md"></circle>
+                                    <circle cx="14" cy="16" r="4" fill="white"></circle>
+                                    <circle cx="26" cy="16" r="4" fill="white"></circle>
+                                    <path
+                                        d="M10 24C10 28 14 32 20 32C26 32 30 28 30 24"
+                                        stroke="white"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                    ></path>
+                                </svg>
+                            </div>
+                            <div
+                                class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 max-w-md relative shadow-lg border-r border-t border-white/50"
+                            >
+                                <p class="text-gray-700 leading-relaxed">
+                                    Os principais exercícios para costas são: remada curvada, remada unilateral, puxada
+                                    na frente, barra fixa, levantamento terra, crucifixo invertido e encolhimento. Eles
+                                    trabalham dorsais, trapézio e lombar.
+                                </p>
+                                <div
+                                    class="absolute left-0 top-6 w-4 h-4 bg-white/90 transform rotate-45 -translate-x-1/2 border-r border-t border-white/50"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="absolute bottom-0 left-0 w-full bg-emerald-600/80 backdrop-blur-md p-6 border-t border-white/20"
+                >
+                    <div class="relative bg-white/90 rounded-2xl flex items-center p-3 shadow-xl max-w-4xl mx-auto">
+                        <input
+                            type="text"
+                            placeholder="Pergunte alguma coisa"
+                            class="w-full border-none outline-none px-4 py-2 bg-transparent text-gray-700 placeholder-gray-400"
+                        />
+                        <button
+                            class="p-3 bg-emerald-500 rounded-full ml-2 hover:bg-emerald-600 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                        >
+                            <svg
+                                class="w-6 h-6 text-white"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M21.7 2.3C21.5 2.1 21.2 2 21 2C20.8 2 20.6 2.1 20.4 2.2L2.4 12.2C2.1 12.4 2 12.7 2 13C2 13.3 2.2 13.6 2.5 13.7L8 16.5V21C8 21.4 8.2 21.7 8.5 21.9C8.6 22 8.8 22 9 22C9.2 22 9.4 21.9 9.6 21.8L13.6 19.8C13.9 19.6 14 19.3 14 19V17.5L20.5 20.3C20.6 20.4 20.8 20.4 21 20.4C21.2 20.4 21.3 20.4 21.5 20.3C21.8 20.1 22 19.8 22 19.5V3C22 2.7 21.9 2.5 21.7 2.3Z"
+                                    fill="currentColor"
+                                ></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
