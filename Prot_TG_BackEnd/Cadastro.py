@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 import pymysql
 from werkzeug.security import generate_password_hash
+from flask_cors import CORS  # ← importe o módulo CORS
 
-app = Flask(__name__)
+app = Flask(__name__)       # ← cria o app Flask
+CORS(app)                   # ← habilita CORS para todas as rotas
 
 db_config = {
     'host': 'localhost',
@@ -13,6 +15,7 @@ db_config = {
     'cursorclass': pymysql.cursors.DictCursor
 }
 
+# suas rotas aqui
 @app.route('/', methods=['GET'])
 def index():
     return 'Servidor Flask funcionando!'
