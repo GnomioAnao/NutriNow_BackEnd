@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 import pymysql
-from werkzeug.security import generate_password_hash
-from flask_cors import CORS  # ← importe o módulo CORS
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS  # habilita CORS
 
-app = Flask(__name__)       # ← cria o app Flask
-CORS(app)                   # ← habilita CORS para todas as rotas
+app = Flask(__name__)
+CORS(app)  # libera acesso do front
 
+# Config do banco
 db_config = {
     'host': 'localhost',
     'port': 3306,
@@ -15,7 +16,8 @@ db_config = {
     'cursorclass': pymysql.cursors.DictCursor
 }
 
-# suas rotas aqui
+# ---------------- ROTAS ----------------
+
 @app.route('/', methods=['GET'])
 def index():
     return 'Servidor Flask funcionando!'
@@ -140,5 +142,41 @@ def delete_usuario(user_id):
         if 'conn' in locals():
             conn.close()
 
+# LOGIN
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    senha = data.get('senha')
+
+    if not email or not senha:
+        return jsonify({'error': 'Email e senha são obrigatórios'}), 400
+
+    try:
+        conn = pymysql.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, nome, email, senha FROM usuarios WHERE email=%s", (email,))
+        usuario = cursor.fetchone()
+
+        if usuario and check_password_hash(usuario['senha'], senha):
+            return jsonify({
+                'message': 'Login realizado com sucesso!',
+                'usuario': {
+                    'id': usuario['id'],
+                    'nome': usuario['nome'],
+                    'email': usuario['email']
+                }
+            }), 200
+        else:
+            return jsonify({'error': 'Email ou senha inválidos'}), 401
+    except pymysql.MySQLError as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+# ---------------- MAIN ----------------
 if __name__ == '__main__':
     app.run(debug=True)
