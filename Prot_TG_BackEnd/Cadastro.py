@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_cors import CORS  # habilita CORS
+from flask_cors import CORS 
 
 app = Flask(__name__)
-CORS(app)  # libera acesso do front
+CORS(app)  
 
-# Config do banco
+
 db_config = {
     'host': 'localhost',
     'port': 3306,
@@ -16,13 +16,13 @@ db_config = {
     'cursorclass': pymysql.cursors.DictCursor
 }
 
-# ---------------- ROTAS ----------------
+
 
 @app.route('/', methods=['GET'])
 def index():
     return 'Servidor Flask funcionando!'
 
-# CREATE
+
 @app.route('/criar-conta', methods=['POST'])
 def criar_conta():
     data = request.get_json()
@@ -56,7 +56,7 @@ def criar_conta():
         if 'conn' in locals():
             conn.close()
 
-# READ ALL
+
 @app.route('/usuarios', methods=['GET'])
 def get_usuarios():
     try:
@@ -73,7 +73,7 @@ def get_usuarios():
         if 'conn' in locals():
             conn.close()
 
-# READ ONE BY ID
+
 @app.route('/usuarios/<int:user_id>', methods=['GET'])
 def get_usuario(user_id):
     try:
@@ -92,7 +92,7 @@ def get_usuario(user_id):
         if 'conn' in locals():
             conn.close()
 
-# UPDATE
+
 @app.route('/usuarios/<int:user_id>', methods=['PUT'])
 def update_usuario(user_id):
     data = request.get_json()
@@ -123,7 +123,6 @@ def update_usuario(user_id):
         if 'conn' in locals():
             conn.close()
 
-# DELETE
 @app.route('/usuarios/<int:user_id>', methods=['DELETE'])
 def delete_usuario(user_id):
     try:
@@ -142,7 +141,6 @@ def delete_usuario(user_id):
         if 'conn' in locals():
             conn.close()
 
-# LOGIN
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -177,6 +175,5 @@ def login():
         if 'conn' in locals():
             conn.close()
 
-# ---------------- MAIN ----------------
 if __name__ == '__main__':
     app.run(debug=True)
