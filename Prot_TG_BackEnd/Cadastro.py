@@ -175,5 +175,35 @@ def login():
         if 'conn' in locals():
             conn.close()
 
+# função esqueci a senha
+
+@app.route('/esqueci-senha', methods=['POST'])
+def esqueci_senha():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': 'O email é obrigatório.'}), 400
+
+    try:
+        conn = pymysql.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM usuarios WHERE email=%s", (email,))
+        usuario = cursor.fetchone()
+
+        if usuario:
+            return jsonify({'message': 'As instruções foram enviadas para o email.'}), 200
+        else:
+            return jsonify({'message': 'Email não cadastrado.'}), 404
+
+    except pymysql.MySQLError as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
