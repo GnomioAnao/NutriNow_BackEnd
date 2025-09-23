@@ -23,7 +23,7 @@ def index():
     return 'Servidor Flask funcionando!'
 
 
-@app.route('/criar-conta', methods=['POST'])
+@app.route('/cadastro', methods=['POST'])
 def criar_conta():
     data = request.get_json()
     nome = data.get('nome')
