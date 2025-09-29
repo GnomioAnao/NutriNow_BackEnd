@@ -24,7 +24,7 @@ def index():
 
 
 @app.route('/cadastro', methods=['POST'])
-def criar_conta():
+def cadastro():
     data = request.get_json()
     nome = data.get('nome')
     sobrenome = data.get('sobrenome')
