@@ -184,7 +184,7 @@ def login():
 def enviar_email(destinatario, assunto, mensagem_html):
     remetente = "nnutrinow@gmail.com"  
     # Rapaziada, tem que colocar a senha Flask do Google, depois vou colocar o dotenv------------------------------------------------
-    senha = "Sua_senha_app_flask"    
+    senha = "Chave_Flask_Do_Email"    
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = assunto
@@ -232,7 +232,7 @@ def esqueci_senha():
         conn.commit()
 
    
-        link_reset = f"http://localhost:3000/redefinir-senha?token={token}"
+        link_reset = f"http://localhost:4200/redefinir-senha?token={token}"
         mensagem_html = f"""
         <html>
         <body>
