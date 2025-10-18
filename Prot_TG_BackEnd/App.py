@@ -1,29 +1,32 @@
-from flask import Flask, request, jsonify, session, redirect, url_for, flash, render_template
+from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from Nutri import NutritionistAgent
 import mysql.connector
 import os, uuid, logging
-from datetime import datetime, timedelta
-import secrets
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 # ---------------- Configurações ----------------
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+
+# Chave secreta
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "uma_chave_secreta_forte_aqui")
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB
-UPLOAD_FOLDER = r"C:\Users\eduar\Pictures\Uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Configuração de cookies de sessão
+app.config.update(
+    SESSION_COOKIE_SAMESITE="Lax",  # Funciona bem em localhost
+    SESSION_COOKIE_SECURE=False,    # HTTPS = True, localhost = False
+)
+
+# CORS
+CORS(app, supports_credentials=True, origins=["http://localhost:4200"])
 
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ---------------- Conexão MySQL ----------------
-def get_db_connection(): 
+def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
         user=os.getenv('MYSQL_USER', 'root'),
@@ -47,38 +50,6 @@ def get_agent(session_id: str, user_id: int = None, email: str = None):
     return agent
 
 # ---------------- Rotas de autenticação ----------------
-@app.route("/cadastro", methods=["POST"])
-def cadastro():
-    data = request.get_json()
-    nome = data.get("nome")
-    sobrenome = data.get("sobrenome")
-    data_nascimento = data.get("data_nascimento")
-    genero = data.get("genero")
-    email = data.get("email")
-    senha = data.get("senha")
-
-    if not all([nome, sobrenome, data_nascimento, genero, email, senha]):
-        return jsonify({"error": "Todos os campos são obrigatórios"}), 400
-
-    senha_hash = generate_password_hash(senha)
-
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id FROM usuarios WHERE email=%s", (email,))
-        if cursor.fetchone():
-            return jsonify({"error": "E-mail já cadastrado"}), 400
-
-        cursor.execute("""
-            INSERT INTO usuarios (nome, sobrenome, data_nascimento, genero, email, senha)
-            VALUES (%s,%s,%s,%s,%s,%s)
-        """, (nome, sobrenome, data_nascimento, genero, email, senha_hash))
-        conn.commit()
-        return jsonify({"message": "Cadastro realizado com sucesso!"}), 201
-    finally:
-        cursor.close()
-        conn.close()
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -95,15 +66,20 @@ def login():
         if not user or not check_password_hash(user["senha"], senha):
             return jsonify({"error": "Email ou senha inválidos"}), 401
 
+        # Cria sessão Flask
         session["user_id"] = user["id"]
         session["user_name"] = user["nome"]
         session["user_email"] = user["email"]
-        return jsonify({"message": "Login realizado com sucesso!", "user": {"id": user["id"], "nome": user["nome"], "email": user["email"]}}), 200
+
+        return jsonify({
+            "message": "Login realizado com sucesso!",
+            "user": {"id": user["id"], "nome": user["nome"], "email": user["email"]}
+        }), 200
     finally:
         cursor.close()
         conn.close()
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     return jsonify({"message": "Logout realizado"}), 200
@@ -111,24 +87,20 @@ def logout():
 # ---------------- Rotas do chatbot ----------------
 @app.route("/chat", methods=["POST"])
 def chat():
-    try:
-        if "user_id" not in session:
-            return jsonify({"error": "Usuário não autenticado"}), 401
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
 
-        session_id = request.headers.get("X-Session-ID") or str(uuid.uuid4())
-        user_id = session.get("user_id")
-        email = session.get("user_email")
-        data = request.get_json()
-        message = data.get("message")
-        if not message:
-            return jsonify({"error": "Mensagem vazia"}), 400
+    session_id = request.headers.get("X-Session-ID") or str(uuid.uuid4())
+    user_id = session.get("user_id")
+    email = session.get("user_email")
+    data = request.get_json()
+    message = data.get("message")
+    if not message:
+        return jsonify({"error": "Mensagem vazia"}), 400
 
-        agent = get_agent(session_id=session_id, user_id=user_id, email=email)
-        response_text = agent.run_text(message)
-        return jsonify({"success": True, "session_id": session_id, "response": response_text}), 200
-    except Exception as e:
-        logger.exception("Erro no /chat")
-        return jsonify({"success": False, "error": str(e)}), 500
+    agent = get_agent(session_id=session_id, user_id=user_id, email=email)
+    response_text = agent.run_text(message)
+    return jsonify({"success": True, "session_id": session_id, "response": response_text}), 200
 
 @app.route("/chat_history", methods=["GET"])
 def chat_history():
@@ -141,10 +113,17 @@ def chat_history():
     history = agent.get_conversation_history(by_user=True)
     return jsonify({"success": True, "history": history})
 
-# ---------------- Rota de health check ----------------
+# ---------------- Health check ----------------
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+# ---------------- Headers CORS extra para pré-flight ----------------
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # ---------------- Executar ----------------
 if __name__ == "__main__":
