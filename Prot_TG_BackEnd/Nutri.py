@@ -3,7 +3,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.memory import ConversationBufferMemory
 from langchain.schema import BaseMessage, HumanMessage, AIMessage
 from dotenv import load_dotenv
-from food_analyser import FoodAnalyser
+from Food_Analyser import FoodAnalyser
 import os, warnings, traceback
 import mysql.connector
 from datetime import datetime
