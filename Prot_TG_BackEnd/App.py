@@ -19,7 +19,7 @@ app.config.update(
 )
 
 # CORS
-CORS(app, supports_credentials=True, origins=["http://localhost:4200"])
+CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_credentials=True)
 
 # Logging
 logging.basicConfig(level=logging.INFO)
