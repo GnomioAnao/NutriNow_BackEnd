@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from Nutri import NutritionistAgent
+from Food_Analyser import FoodAnalyser
 import mysql.connector
 import os, uuid, logging
 from datetime import datetime
@@ -24,6 +25,9 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_cred
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+UPLOAD_FOLDER = r"C:\Users\Júlio César\Pictures\Uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Conexão MySQL ----------------
 def get_db_connection():
@@ -158,6 +162,66 @@ def chat_history():
     agent = get_agent(session_id=session_id, user_id=user_id)
     history = agent.get_conversation_history(by_user=True)
     return jsonify({"success": True, "history": history})
+
+@app.route("/analyze_image", methods=["POST", "OPTIONS"])
+def analyze_image():
+    if request.method == "OPTIONS":
+        return jsonify({"message": "OK"}), 200
+
+    try:
+        # Recupera sessão
+        session_id = request.headers.get('X-Session-ID') or request.form.get('session_id')
+        user_id = session.get("user_id")
+        email = session.get("user_email")
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        if not user_id:
+            return jsonify({"error": "Usuário não autenticado"}), 401
+
+        # Verifica se veio arquivo
+        if 'file' not in request.files:
+            return jsonify({"error": "Nenhum arquivo enviado"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "Nenhum arquivo selecionado"}), 400
+
+        # Define message_type (default 'human')
+        message_type = request.form.get('message_type', 'human')
+        if message_type not in ['human', 'ai']:
+            return jsonify({"error": "message_type inválido"}), 400
+
+        # Salva arquivo no servidor
+        file_ext = os.path.splitext(file.filename)[1]
+        filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        # Salva no banco de dados
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO uploads (user_id, file_path, uploaded_at, message_type) VALUES (%s, %s, NOW(), %s)",
+            (user_id, file_path, message_type)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        # Processa imagem com o agente
+        agent = get_agent(session_id=session_id, user_id=user_id, email=email)
+        analysis_result = agent.run_image(file_path)
+
+        return jsonify({
+            "success": True,
+            "session_id": session_id,
+            "file_path": file_path,
+            "message_type": message_type,
+            "response": analysis_result
+        }), 200
+
+    except Exception as e:
+        logger.exception("Erro no endpoint /analyze_image")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 # ---------------- Health check ----------------
 @app.route("/health", methods=["GET"])
