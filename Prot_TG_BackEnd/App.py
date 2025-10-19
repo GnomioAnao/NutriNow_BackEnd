@@ -30,7 +30,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
         user=os.getenv('MYSQL_USER', 'root'),
-        password=os.getenv('MYSQL_PASSWORD', '12345678'),
+        password=os.getenv('MYSQL_PASSWORD', ''),
         database=os.getenv('MYSQL_DATABASE', 'nutrinow2')
     )
 
@@ -50,6 +50,52 @@ def get_agent(session_id: str, user_id: int = None, email: str = None):
     return agent
 
 # ---------------- Rotas de autenticação ----------------
+@app.route("/cadastro", methods=["POST"])
+def cadastro():
+    data = request.get_json()
+    nome = data.get("nome")
+    sobrenome = data.get("sobrenome")
+    data_nascimento = data.get("data_nascimento")
+    genero = data.get("genero")
+    email = data.get("email")
+    senha = data.get("senha")
+
+    if not all([nome, sobrenome, email, senha]):
+        return jsonify({"error": "Campos obrigatórios ausentes"}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # Verifica se o email já existe
+        cursor.execute("SELECT id FROM usuarios WHERE email=%s", (email,))
+        if cursor.fetchone():
+            return jsonify({"error": "Email já cadastrado"}), 409
+
+        # Cria hash da senha
+        senha_hash = generate_password_hash(senha)
+
+        # Insere o usuário no banco
+        cursor.execute("""
+            INSERT INTO usuarios (nome, sobrenome, data_nascimento, genero, email, senha)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (nome, sobrenome, data_nascimento, genero, email, senha_hash))
+        conn.commit()
+
+        return jsonify({"message": "Conta criada com sucesso!"}), 201
+
+    except mysql.connector.Error as e:
+        logger.error(f"Erro MySQL: {e}")
+        return jsonify({"error": "Erro no banco de dados"}), 500
+
+    except Exception as e:
+        logger.error(f"Erro ao criar conta: {e}")
+        return jsonify({"error": "Erro interno ao criar conta"}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
