@@ -6,6 +6,12 @@ from Food_Analyser import FoodAnalyser
 import mysql.connector
 import os, uuid, logging
 from datetime import datetime
+import pymysql
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timedelta
+import secrets
 
 # ---------------- Configurações ----------------
 app = Flask(__name__)
@@ -26,15 +32,15 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_cred
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = r"C:\Users\Júlio César\Pictures\Uploads"
+UPLOAD_FOLDER = r"C:\Users\eduar\Pictures\Uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Conexão MySQL ----------------
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
-        user=os.getenv('MYSQL_USER', 'root'),
-        password=os.getenv('MYSQL_PASSWORD', ''),
+        user=os.getenv('MYSQL_USER', 'nutriuser'),
+        password=os.getenv('MYSQL_PASSWORD', '12345678'),
         database=os.getenv('MYSQL_DATABASE', 'nutrinow2')
     )
 
@@ -234,7 +240,125 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     return response
+#--------------- Envia email e recupera a senha ------------------------
+# -----------------------------
+# Função de envio de email
+# -----------------------------
+def enviar_email(destinatario, assunto, mensagem_html):
+    remetente = "nnutrinow@gmail.com"
+    senha = "Sua_senha_Flask_Aqui"  # senha de app do Gmail
 
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = assunto
+    msg["From"] = remetente
+    msg["To"] = destinatario
+    msg.attach(MIMEText(mensagem_html, "html"))
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(remetente, senha)
+            server.sendmail(remetente, destinatario, msg.as_string())
+        return True
+    except Exception as e:
+        logger.error(f"Erro ao enviar email: {e}")
+        return False
+
+
+# -----------------------------
+# Endpoint: Esqueci minha senha
+# -----------------------------
+@app.route('/esqueci-senha', methods=['POST'])
+def esqueci_senha():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({'error': 'O email é obrigatório.'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)  # <--- aqui
+        cursor.execute("SELECT id, nome FROM usuarios WHERE email=%s", (email,))
+        usuario = cursor.fetchone()
+
+        if not usuario:
+            return jsonify({'message': 'Email não cadastrado.'}), 404
+
+        token = secrets.token_urlsafe(32)
+        expiracao = datetime.now() + timedelta(hours=1)
+
+        cursor.execute("""
+            INSERT INTO redefinicao_senha (usuario_id, token, data_expiracao)
+            VALUES (%s, %s, %s)
+        """, (usuario['id'], token, expiracao))
+        conn.commit()
+
+        link_reset = f"http://localhost:4200/redefinir-senha?token={token}"
+        mensagem_html = f"""
+        <html>
+        <body>
+            <h2>Redefinição de Senha - NutriNow</h2>
+            <p>Olá, {usuario['nome']}!</p>
+            <p>Clique no link abaixo para redefinir sua senha (válido por 1 hora):</p>
+            <a href="{link_reset}" target="_blank">Redefinir minha senha</a>
+            <br><br>
+            <p>Se você não fez esta solicitação, ignore este e-mail.</p>
+        </body>
+        </html>
+        """
+
+        if enviar_email(email, "Recuperação de Senha - NutriNow", mensagem_html):
+            return jsonify({'message': 'As instruções foram enviadas para o e-mail.'}), 200
+        else:
+            return jsonify({'error': 'Falha ao enviar o e-mail.'}), 500
+
+    except mysql.connector.Error as err:
+        logger.error(f"Erro MySQL: {err}")
+        return jsonify({'error': str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+# -----------------------------
+# Endpoint: Redefinir senha
+# -----------------------------
+@app.route('/redefinir-senha', methods=['POST'])
+def redefinir_senha():
+    data = request.get_json()
+    token = data.get('token')
+    nova_senha = data.get('nova_senha')
+
+    if not token or not nova_senha:
+        return jsonify({'error': 'Token e nova senha são obrigatórios.'}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)  # <--- aqui
+
+        cursor.execute("""
+            SELECT usuario_id FROM redefinicao_senha
+            WHERE token=%s AND data_expiracao > NOW()
+        """, (token,))
+        registro = cursor.fetchone()
+
+        if not registro:
+            return jsonify({'error': 'Token inválido ou expirado.'}), 400
+
+        senha_hash = generate_password_hash(nova_senha)
+        cursor.execute("UPDATE usuarios SET senha=%s WHERE id=%s", (senha_hash, registro['usuario_id']))
+        cursor.execute("DELETE FROM redefinicao_senha WHERE token=%s", (token,))
+        conn.commit()
+
+        return jsonify({'message': 'Senha redefinida com sucesso!'}), 200
+
+    except mysql.connector.Error as err:
+        logger.error(f"Erro MySQL: {err}")
+        return jsonify({'error': str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
 # ---------------- Executar ----------------
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.getenv("PORT", 8000)), debug=True)

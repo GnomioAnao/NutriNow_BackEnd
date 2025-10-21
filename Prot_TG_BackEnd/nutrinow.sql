@@ -38,3 +38,13 @@ CREATE TABLE chat_history (
     INDEX idx_timestamp (timestamp),
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabela para o Upload das imagens pela IA
+CREATE TABLE uploads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    uploaded_at DATETIME NOT NULL,
+    message_type ENUM('human','ai') NOT NULL DEFAULT 'human',
+    FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
