@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from nutri import NutritionistAgent
+from Nutri import NutritionistAgent
 import mysql.connector
 import os, uuid, logging
 

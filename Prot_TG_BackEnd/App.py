@@ -2,11 +2,9 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from Nutri import NutritionistAgent
-from Food_Analyser import FoodAnalyser
 import mysql.connector
 import os, uuid, logging
 from datetime import datetime
-import pymysql
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -39,8 +37,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
-        user=os.getenv('MYSQL_USER', 'nutriuser'),
-        password=os.getenv('MYSQL_PASSWORD', '12345678'),
+        user=os.getenv('MYSQL_USER', 'root'),
+        password=os.getenv('MYSQL_PASSWORD', ''),
         database=os.getenv('MYSQL_DATABASE', 'nutrinow2')
     )
 
