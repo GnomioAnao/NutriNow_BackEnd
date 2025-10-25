@@ -30,7 +30,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_cred
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = r"C:\Users\eduar\Pictures\Uploads"
+UPLOAD_FOLDER = r"C:\Users\Júlio César\Pictures\Uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Conexão MySQL ----------------
@@ -71,6 +71,9 @@ def cadastro():
     if not all([nome, sobrenome, email, senha]):
         return jsonify({"error": "Campos obrigatórios ausentes"}), 400
 
+    conn = None
+    cursor = None
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -101,8 +104,10 @@ def cadastro():
         return jsonify({"error": "Erro interno ao criar conta"}), 500
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 @app.route("/login", methods=["POST"])
 def login():

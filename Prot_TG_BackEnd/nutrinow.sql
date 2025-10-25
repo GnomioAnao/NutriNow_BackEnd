@@ -1,6 +1,6 @@
-CREATE DATABASE nutrinow;
+CREATE DATABASE nutrinow2;
 
-USE nutrinow;
+USE nutrinow2;
 select * from usuarios;
 
 CREATE TABLE usuarios (
