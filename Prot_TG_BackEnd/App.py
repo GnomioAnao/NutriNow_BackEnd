@@ -30,15 +30,15 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_cred
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = r"C:\Users\Júlio César\Pictures\Uploads"
+UPLOAD_FOLDER = r"C:\Users\eduar\Pictures\Uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Conexão MySQL ----------------
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
-        user=os.getenv('MYSQL_USER', 'root'),
-        password=os.getenv('MYSQL_PASSWORD', ''),
+        user=os.getenv('MYSQL_USER', 'nutriuser'),
+        password=os.getenv('MYSQL_PASSWORD', '12345678'),
         database=os.getenv('MYSQL_DATABASE', 'nutrinow2')
     )
 
@@ -492,6 +492,120 @@ def delete_perfil():
     except mysql.connector.Error as err:
         logger.error(f"Erro MySQL ao excluir perfil: {err}")
         return jsonify({"error": str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+# ----------------------------- 
+# Endpoint: Dieta-Treino Ajustado
+# -----------------------------
+
+@app.route('/dieta-treino', methods=['GET'])
+def get_items():
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    user_id = session["user_id"]
+    aba = request.args.get('tipo', 'treinos')  # valor enviado pelo front: 'treinos' ou 'dietas'
+
+    # Mapear para ENUM do banco
+    tipo = 'treino' if aba == 'treinos' else 'dieta'
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, title, description, time, tipo
+            FROM dieta_treino
+            WHERE user_id=%s AND tipo=%s
+            ORDER BY created_at ASC
+        """, (user_id, tipo))
+        items = cursor.fetchall()
+        return jsonify({"success": True, "items": items}), 200
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+@app.route('/dieta-treino', methods=['POST'])
+def add_item():
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    data = request.get_json()
+    title = data.get('title')
+    description = data.get('description')
+    time = data.get('time', None)
+    aba = data.get('tipo')  # 'treinos' ou 'dietas'
+
+    if not all([title, description, aba]):
+        return jsonify({"error": "Campos obrigatórios ausentes"}), 400
+
+    tipo = 'treino' if aba == 'treinos' else 'dieta'
+    user_id = session["user_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO dieta_treino (user_id, tipo, title, description, time)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, tipo, title, description, time))
+        conn.commit()
+        return jsonify({"success": True, "message": "Item adicionado com sucesso!"}), 201
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+@app.route('/dieta-treino/<int:item_id>', methods=['PUT'])
+def update_item(item_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    data = request.get_json()
+    title = data.get('title')
+    description = data.get('description')
+    time = data.get('time', None)
+    aba = data.get('tipo')
+
+    if not all([title, description, aba]):
+        return jsonify({"error": "Campos obrigatórios ausentes"}), 400
+
+    tipo = 'treino' if aba == 'treinos' else 'dieta'
+    user_id = session["user_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE dieta_treino
+            SET title=%s, description=%s, time=%s, tipo=%s, updated_at=NOW()
+            WHERE id=%s AND user_id=%s
+        """, (title, description, time, tipo, item_id, user_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "Item atualizado com sucesso!"}), 200
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+@app.route('/dieta-treino/<int:item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    user_id = session["user_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            DELETE FROM dieta_treino
+            WHERE id=%s AND user_id=%s
+        """, (item_id, user_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "Item excluído com sucesso!"}), 200
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
