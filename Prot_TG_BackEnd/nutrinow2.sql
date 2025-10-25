@@ -57,3 +57,11 @@ ALTER TABLE chat_history AUTO_INCREMENT = 1;
 
 DELETE FROM usuarios WHERE id > 0;
 ALTER TABLE usuarios AUTO_INCREMENT = 1;
+
+select * from perfil;
+CREATE TABLE perfil (
+    usuario_id INT PRIMARY KEY,
+    meta VARCHAR(255) DEFAULT 'Não definida',
+    altura_peso VARCHAR(50) DEFAULT '-- / --',
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);

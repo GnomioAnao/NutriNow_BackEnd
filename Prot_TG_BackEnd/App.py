@@ -249,7 +249,7 @@ def after_request(response):
 # -----------------------------
 def enviar_email(destinatario, assunto, mensagem_html):
     remetente = "nnutrinow@gmail.com"
-    senha = "Sua_senha_Flask_Aqui"  # senha de app do Gmail
+    senha = ""  # senha de app do Gmail
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = assunto
@@ -362,6 +362,140 @@ def redefinir_senha():
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
+
+# -----------------------------
+# Endpoint: perfil
+# -----------------------------
+@app.route('/perfil', methods=['GET'])
+def get_perfil():
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    user_id = session["user_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT u.nome, u.email, u.data_nascimento, 
+                   IFNULL(p.meta, 'Não definida') AS meta, 
+                   IFNULL(p.altura_peso, '-- / --') AS altura_peso
+            FROM usuarios u
+            LEFT JOIN perfil p ON u.id = p.usuario_id
+            WHERE u.id = %s
+        """, (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({"error": "Usuário não encontrado"}), 404
+
+        return jsonify({
+            "success": True,
+            "nome": user["nome"],
+            "email": user["email"],
+            "dataNascimento": user["data_nascimento"].strftime("%d/%m/%Y") if user["data_nascimento"] else "--/--/----",
+            "meta": user["meta"],
+            "alturaPeso": user["altura_peso"]
+        }), 200
+
+    except mysql.connector.Error as err:
+        logger.error(f"Erro MySQL ao buscar perfil: {err}")
+        return jsonify({"error": str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+@app.route('/perfil', methods=['POST'])
+def update_perfil():
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    data = request.get_json()
+    nome = data.get('nome')
+    email = data.get('email')
+    data_nascimento = data.get('dataNascimento')
+    meta = data.get('meta')
+    altura_peso = data.get('alturaPeso')
+
+    user_id = session["user_id"]
+
+    try:
+        # Converte data dd/mm/yyyy → yyyy-mm-dd
+        if data_nascimento:
+            try:
+                data_nascimento = datetime.strptime(data_nascimento, "%d/%m/%Y").strftime("%Y-%m-%d")
+            except ValueError:
+                return jsonify({"error": "Formato de data inválido. Use dd/mm/yyyy"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Atualiza tabela usuarios
+        if any([nome, email, data_nascimento]):
+            query_parts = []
+            params = []
+            if nome:
+                query_parts.append("nome=%s")
+                params.append(nome)
+            if email:
+                query_parts.append("email=%s")
+                params.append(email)
+            if data_nascimento:
+                query_parts.append("data_nascimento=%s")
+                params.append(data_nascimento)
+            params.append(user_id)
+            cursor.execute(f"UPDATE usuarios SET {', '.join(query_parts)} WHERE id=%s", tuple(params))
+
+        # Atualiza ou insere tabela perfil
+        cursor.execute("SELECT usuario_id FROM perfil WHERE usuario_id=%s", (user_id,))
+        if cursor.fetchone():
+            cursor.execute(
+                "UPDATE perfil SET meta=%s, altura_peso=%s WHERE usuario_id=%s",
+                (meta, altura_peso, user_id)
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO perfil (usuario_id, meta, altura_peso) VALUES (%s, %s, %s)",
+                (user_id, meta, altura_peso)
+            )
+
+        conn.commit()
+        return jsonify({"success": True, "message": "Perfil atualizado com sucesso!"}), 200
+
+    except mysql.connector.Error as err:
+        logger.error(f"Erro MySQL ao atualizar perfil: {err}")
+        return jsonify({"error": str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
+
+@app.route('/perfil', methods=['DELETE'])
+def delete_perfil():
+    if "user_id" not in session:
+        return jsonify({"error": "Usuário não autenticado"}), 401
+
+    user_id = session["user_id"]
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM perfil WHERE usuario_id=%s", (user_id,))
+        cursor.execute("DELETE FROM usuarios WHERE id=%s", (user_id,))
+        conn.commit()
+
+        session.clear()
+        return jsonify({"success": True, "message": "Conta e perfil excluídos com sucesso!"}), 200
+
+    except mysql.connector.Error as err:
+        logger.error(f"Erro MySQL ao excluir perfil: {err}")
+        return jsonify({"error": str(err)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conn' in locals(): conn.close()
+
 # ---------------- Executar ----------------
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.getenv("PORT", 8000)), debug=True)
