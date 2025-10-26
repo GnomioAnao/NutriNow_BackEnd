@@ -2,10 +2,14 @@ CREATE database nutrinow2;
 
 -- Banco de dados
 select * from usuarios;
+select * from perfil;
 select * from uploads;
 select * from chat_history;
 select * from redefinicao_senha;
+select * from dieta_treino;
+
 USE nutrinow2;
+
 -- Tabela de usuários
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,6 +47,7 @@ CREATE TABLE IF NOT EXISTS chat_history (
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabela salvar imagens
 CREATE TABLE uploads (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -52,13 +57,7 @@ CREATE TABLE uploads (
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-delete from chat_history WHERE id > 0;
-ALTER TABLE chat_history AUTO_INCREMENT = 1;
-
-DELETE FROM usuarios WHERE id > 0;
-ALTER TABLE usuarios AUTO_INCREMENT = 1;
-
-select * from perfil;
+-- Tabela de criação de perfil de usuário
 CREATE TABLE perfil (
     usuario_id INT PRIMARY KEY,
     meta VARCHAR(255) DEFAULT 'Não definida',
@@ -66,7 +65,7 @@ CREATE TABLE perfil (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
-select * from dieta_treino;
+-- Tabela de criação de dietas e treinos
 CREATE TABLE IF NOT EXISTS dieta_treino (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -78,3 +77,15 @@ CREATE TABLE IF NOT EXISTS dieta_treino (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
+
+delete from chat_history WHERE id > 0;
+ALTER TABLE chat_history AUTO_INCREMENT = 1;
+
+DELETE FROM usuarios WHERE id > 0;
+ALTER TABLE usuarios AUTO_INCREMENT = 1;
+
+DELETE FROM perfil WHERE usuario_id > 0;
+ALTER TABLE perfil AUTO_INCREMENT = 1;
+
+DELETE FROM dieta_treino WHERE id > 0;
+ALTER TABLE dieta_treino AUTO_INCREMENT = 1;
