@@ -615,26 +615,20 @@ def delete_item(item_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        print(f"[DEBUG] Deletando item_id={item_id}, user_id={user_id}")
 
         cursor.execute("""
             DELETE FROM dieta_treino
-            WHERE id=%s AND user_id=%s
+            WHERE id = %s AND user_id = %s
         """, (item_id, user_id))
+
         conn.commit()
-
-        if cursor.rowcount == 0:
-            print(f"[DEBUG] Nenhum item encontrado para deletar (id={item_id})")
-            return jsonify({"error": "Item não encontrado"}), 404
-
-        print(f"[DEBUG] Item {item_id} deletado com sucesso.")
         return jsonify({"success": True, "message": "Item excluído com sucesso!"}), 200
-    except Exception as e:
-        print(f"[ERRO][DELETE] {e}")
-        return jsonify({"error": "Falha ao excluir item"}), 500
+
     finally:
-        if 'cursor' in locals(): cursor.close()
-        if 'conn' in locals(): conn.close()
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
 
 # ---------------- Executar ----------------
 if __name__ == "__main__":
