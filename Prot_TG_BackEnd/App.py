@@ -30,15 +30,15 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}}, supports_cred
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = r"C:\Users\eduar\Pictures\Uploads"
+UPLOAD_FOLDER = r"C:\Users\Júlio César\Pictures\Uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ---------------- Conexão MySQL ----------------
 def get_db_connection():
     return mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
-        user=os.getenv('MYSQL_USER', 'nutriuser'),
-        password=os.getenv('MYSQL_PASSWORD', '12345678'),
+        user=os.getenv('MYSQL_USER', 'root'),
+        password=os.getenv('MYSQL_PASSWORD', ''),
         database=os.getenv('MYSQL_DATABASE', 'nutrinow2')
     )
 
@@ -500,33 +500,38 @@ def delete_perfil():
 # Endpoint: Dieta-Treino Ajustado
 # -----------------------------
 
+# ------------------------ GET ------------------------
 @app.route('/dieta-treino', methods=['GET'])
 def get_items():
     if "user_id" not in session:
         return jsonify({"error": "Usuário não autenticado"}), 401
 
     user_id = session["user_id"]
-    aba = request.args.get('tipo', 'treinos')  # valor enviado pelo front: 'treinos' ou 'dietas'
+    aba = request.args.get('tipo', 'treinos')
 
-    # Mapear para ENUM do banco
-    tipo = 'treino' if aba == 'treinos' else 'dieta'
+    # Normaliza o tipo
+    tipo_raw = str(aba).lower()
+    tipo = 'treino' if 'treino' in tipo_raw else 'dieta'
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT id, title, description, time, tipo
+            SELECT id, title, description, time, tipo, created_at, updated_at
             FROM dieta_treino
             WHERE user_id=%s AND tipo=%s
             ORDER BY created_at ASC
         """, (user_id, tipo))
         items = cursor.fetchall()
         return jsonify({"success": True, "items": items}), 200
+    except Exception as e:
+        print(f"[ERRO][GET] {e}")
+        return jsonify({"error": "Falha ao buscar itens"}), 500
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
 
-
+# ------------------------ POST ------------------------
 @app.route('/dieta-treino', methods=['POST'])
 def add_item():
     if "user_id" not in session:
@@ -535,13 +540,13 @@ def add_item():
     data = request.get_json()
     title = data.get('title')
     description = data.get('description')
-    time = data.get('time', None)
-    aba = data.get('tipo')  # 'treinos' ou 'dietas'
+    time = data.get('time')
+    aba = str(data.get('tipo', '')).lower()
 
     if not all([title, description, aba]):
         return jsonify({"error": "Campos obrigatórios ausentes"}), 400
 
-    tipo = 'treino' if aba == 'treinos' else 'dieta'
+    tipo = 'treino' if 'treino' in aba else 'dieta'
     user_id = session["user_id"]
 
     try:
@@ -553,11 +558,14 @@ def add_item():
         """, (user_id, tipo, title, description, time))
         conn.commit()
         return jsonify({"success": True, "message": "Item adicionado com sucesso!"}), 201
+    except Exception as e:
+        print(f"[ERRO][POST] {e}")
+        return jsonify({"error": "Falha ao adicionar item"}), 500
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
 
-
+# ------------------------ PUT ------------------------
 @app.route('/dieta-treino/<int:item_id>', methods=['PUT'])
 def update_item(item_id):
     if "user_id" not in session:
@@ -566,13 +574,13 @@ def update_item(item_id):
     data = request.get_json()
     title = data.get('title')
     description = data.get('description')
-    time = data.get('time', None)
-    aba = data.get('tipo')
+    time = data.get('time')
+    aba = str(data.get('tipo', '')).lower()
 
     if not all([title, description, aba]):
         return jsonify({"error": "Campos obrigatórios ausentes"}), 400
 
-    tipo = 'treino' if aba == 'treinos' else 'dieta'
+    tipo = 'treino' if 'treino' in aba else 'dieta'
     user_id = session["user_id"]
 
     try:
@@ -580,16 +588,23 @@ def update_item(item_id):
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE dieta_treino
-            SET title=%s, description=%s, time=%s, tipo=%s, updated_at=NOW()
+            SET title=%s, description=%s, time=%s, tipo=%s, updated_at=%s
             WHERE id=%s AND user_id=%s
-        """, (title, description, time, tipo, item_id, user_id))
+        """, (title, description, time, tipo, datetime.now(), item_id, user_id))
         conn.commit()
+
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Item não encontrado"}), 404
+
         return jsonify({"success": True, "message": "Item atualizado com sucesso!"}), 200
+    except Exception as e:
+        print(f"[ERRO][PUT] {e}")
+        return jsonify({"error": "Falha ao atualizar item"}), 500
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
 
-
+# ------------------------ DELETE ------------------------
 @app.route('/dieta-treino/<int:item_id>', methods=['DELETE'])
 def delete_item(item_id):
     if "user_id" not in session:
@@ -600,12 +615,23 @@ def delete_item(item_id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+        print(f"[DEBUG] Deletando item_id={item_id}, user_id={user_id}")
+
         cursor.execute("""
             DELETE FROM dieta_treino
             WHERE id=%s AND user_id=%s
         """, (item_id, user_id))
         conn.commit()
+
+        if cursor.rowcount == 0:
+            print(f"[DEBUG] Nenhum item encontrado para deletar (id={item_id})")
+            return jsonify({"error": "Item não encontrado"}), 404
+
+        print(f"[DEBUG] Item {item_id} deletado com sucesso.")
         return jsonify({"success": True, "message": "Item excluído com sucesso!"}), 200
+    except Exception as e:
+        print(f"[ERRO][DELETE] {e}")
+        return jsonify({"error": "Falha ao excluir item"}), 500
     finally:
         if 'cursor' in locals(): cursor.close()
         if 'conn' in locals(): conn.close()
