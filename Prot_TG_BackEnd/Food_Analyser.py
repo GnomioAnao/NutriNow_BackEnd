@@ -68,10 +68,12 @@ class FoodAnalyser(BaseTool):
             return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
     def _create_analysis_prompt(self) -> str:
-        return '''Analise esta imagem de refeição e forneça DIRETAMENTE a resposta neste formato:
+        return '''🍽️ **Análise Nutricional da Refeição**
 
-| Nutriente | Quantidade | % VD* |
-|-----------|------------|-------|
+Por favor, responda **somente** neste formato (usando Markdown):
+
+| 🧾 Nutriente | 💪 Quantidade | ⚖️ % VD* |
+|--------------|---------------|----------|
 | Calorias | X kcal | X% |
 | Carboidratos | X g | X% |
 | Proteínas | X g | X% |
@@ -80,19 +82,22 @@ class FoodAnalyser(BaseTool):
 | Fibras | X g | X% |
 | Sódio | X mg | X% |
 
-*VD = Valores Diários (dieta de 2.000 kcal)
+*VD = Valores Diários (base: dieta de 2.000 kcal)*
 
-**Avaliação**: [Excelente/Boa/Regular/Precisa melhorar]
+---
 
-**Pontos Positivos**:
+### 🌟 Avaliação geral
+> **Classificação:** [Excelente / Boa / Regular / Precisa melhorar]
+
+### ✅ Pontos Positivos
 - [ponto 1]
 - [ponto 2]
 
-**Sugestões**:
+### 💡 Sugestões de Melhoria
 - [sugestão 1]
 - [sugestão 2]
 
-IMPORTANTE: Responda DIRETAMENTE com a tabela. Não faça raciocínio interno extenso.'''
+🧠 *Dica: Responda diretamente com a tabela e as listas acima, sem explicações adicionais.*'''
 
     def _extract_content_from_response(self, response) -> str:
         """Extrai o conteúdo de texto do objeto AIMessage de forma robusta"""
@@ -212,13 +217,19 @@ O modelo está consumindo todos os tokens em raciocínio interno e não gerando 
 **Resposta bruta**: {str(response)[:300]}"""
             
             # Formata o resultado final
-            result_text = f"""ANÁLISE NUTRICIONAL DA REFEIÇÃO
-_Imagem: {os.path.basename(image_path)}_
+            result_text =f"""
+🍱 **Análise Nutricional da Refeição**
+📸 _Imagem analisada:_ **{os.path.basename(image_path)}**
 
 {tabela_texto}
 
 ---
-**Dica da Nutricionista**: Para análises mais precisas, inclua informações sobre suas características (peso, altura, objetivos) e nível de atividade física!"""
+
+💬 **Dica da Nutricionista:**  
+Para análises mais precisas, inclua informações como **peso, altura, objetivos** e **nível de atividade física**.
+
+🧾 *Este é um relatório estimado, não substitui avaliação profissional.*
+"""
 
             return result_text
 
