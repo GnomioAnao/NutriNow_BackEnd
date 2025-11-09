@@ -68,7 +68,7 @@ CREATE TABLE perfil (
 -- Tabela de criação de dietas e treinos
 CREATE TABLE IF NOT EXISTS dieta_treino (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
+    usuario_id INT NOT NULL,
     tipo ENUM('treino', 'dieta') NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
