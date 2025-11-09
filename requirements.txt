@@ -6,7 +6,6 @@ langchain-community
 langchain-core
 pydantic
 Pillow
-flask_cors
-flask
-werkzeug
-smtplib
+Flask
+Flask-Cors
+Werkzeug
